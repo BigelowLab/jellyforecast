@@ -1,0 +1,79 @@
+species: salps
+longname: Salps
+version: v1.02
+class: jellyfish
+note: same as v1.01, but uses o2_sur and sets threshold to 0 abundance
+verbose: yes
+training_data:
+  species: salps
+  species_data:
+    ecomon_column: salps_m2
+    alt_source: function
+    function: read_ecomon_covars
+    threshold:
+      auto: ~
+      min_abund: 0
+      pre: 0
+      post: ~
+  classification:
+    name: patch
+    levels:
+    - 1
+    - 0
+    labels:
+    - '1'
+    - '0'
+  coper_data:
+    vars_static:
+    - deptho
+    - slope
+    reg_phys: chfc
+    vars_phys:
+    - temp_bot
+    - mlotst_mld
+    - sal_sur
+    - temp_sur
+    - vel_sur
+    - zos_zos
+    reg_bgc: world
+    vars_bgc:
+    - chl_sur
+    - no3_sur
+    - nppv_sur
+    - o2_sur
+    - po4_sur
+    - si_sur
+    vars_time:
+    - day_length
+    - ddx_day_length
+  split:
+    func: rsample::mc_cv
+    prop: 0.75
+    times: 25
+model:
+  seed: 799.0
+  model:
+    name: Boosted Regression Tree
+    engine: xgboost
+    trees: 500.0
+    learn_rate: 0.1
+    tree_depth: 4.0
+    mtry: 5.0
+    min_n: 10.0
+    nthread: 4.0
+    engine_version: 3.2.1.1
+  transformations:
+  - step_log_bathy
+  - step_normalize_numeric
+predict:
+  quantiles:
+  - 0.0
+  - 0.05
+  - 0.25
+  - 0.5
+  - 0.75
+  - 0.95
+  - 1.0
+suggested_threshold:
+  quantile: 0.5
+  threshold: 0.3737374

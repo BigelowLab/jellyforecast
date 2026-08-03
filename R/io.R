@@ -20,19 +20,27 @@ package_path = function(...,
   file.path(root, ...)
 }
 
-#' Read the product table (possibly with configs attached)
+#' Read the product table
 #' 
-#' @param export
-#' @param filename chr the path description
+#' @export
+#' @param path chr data path
 #' @return data frame
-read_products = function(filename = system.file("products.csv",
-                                                package = "jellyforecast")){
-  x = readr::read_csv(filename,
-                      col_types = 'ccc')
-  y = list_configs()
+read_products = function(path = package_path()){
+  y = list_configs(path = path)
   if (length(y) > 0){
-    x  = x |>
-      dplyr::mutate(cfg = lapply(y, yaml::read_yaml))
+    cfg = lapply(y, yaml::read_yaml)
+    x = dplyr::tibble(
+      species = sapply(cfg, "[[", "species"),
+      version = sapply(cfg, "[[", "version"),
+      longname = sapply(cfg, "[[", "longname"),
+      cfg = cfg)
+  } else {
+    x = dplyr::tibble(
+      species = "",
+      version = "",
+      longname = "",
+      cfg = list() ) |>
+      dplyr::slice(0)
   }
   x
 }
@@ -48,6 +56,8 @@ read_products = function(filename = system.file("products.csv",
 write_raster = function(x, 
                         cfg,
                         path = data_path()){
+  filename = file.path(path, "species", cfg$species, cfg$version, "data.Rds")
+  odir = jellyforecast::make_path(dirname(filename))
   saveRDS(x, filename[1])
   invisible(x)
 }
@@ -55,7 +65,8 @@ write_raster = function(x,
 #' @rdname write_raster
 #' @export
 read_raster = function(cfg,
-                       path = system.file(package = "jellyforecast")){
+                       path = package_path()){
+  filename = file.path(path, "species", cfg$species, cfg$version, "data.Rds")
   readRDS(filename[1])
 }
 
@@ -68,22 +79,24 @@ read_raster = function(cfg,
 #' @return for `write_config` and `read_config` a configuration list
 write_config = function(x,
                         path = data_path()){
+  filename = file.path(path, "species", cfg$species, cfg$version, "config.yaml")
+  odir = jellyforecast::make_path(dirname(filename))
   yaml::write_yaml(x, filename[1])
   invisible(x)
 }
 
 #' @rdname write_config
 #' @export
-read_config = function(species,
-                       version,
-                       path = system.file(package = "jellyforecast")){
-    yaml::read_yaml(filename[1])
+read_config = function(x,
+                       path = package_path()){
+  filename = file.path(path, "species", cfg$species, cfg$version, "config.yaml")
+  yaml::read_yaml(filename[1])
 }
 
 #' @rdname write_config
 #' @export
-list_configs = function(path = system.file("species", package = "jellyforecast")){
-  list.files(path,
+list_configs = function(path = package_path()){
+  list.files(file.path(path, "species"),
              pattern =  "^.*\\.yaml$",
              full.names = TRUE)
 }
@@ -93,10 +106,10 @@ list_configs = function(path = system.file("species", package = "jellyforecast")
 #' Made with Natural Earth. Free vector and raster map data at naturalearthdata.com.
 #'  
 #' @export
-#' @param filename str, the filename
+#' @param path chr data path
 #' @return sfc (geometry) object
-read_coastline = function(filename = system.file("extdata/coastline.Rds",
-                                                 package = "calfinforecast")){
+read_coastline = function(path = package_path()){
+  filename = file.path(path, "coastline.Rds")
   readRDS(filename[1])
 }
 
@@ -108,25 +121,29 @@ read_coastline = function(filename = system.file("extdata/coastline.Rds",
 #'   of daily graphics
 #' @param path the path to write to
 #' @param wipe logical, when writing daily files, wipe the existing ones first?
-#' @return the inout object
-save_graphics = function(x = plot_forecast(),
+#' @return the input object
+save_graphics = function(cfg, 
+                         x = plot_forecast(cfg),
                          path = data_path(),
                          wipe = TRUE){
-  
+  opath = file.path(path, "species",  cfg$species, cfg$version)
   if (inherits(x, "ggplot")){
     # one item
-    ofile = file.path(path, "wrapped.png")
+    ofile = file.path(opath, "wrapped.png")
     suppressMessages(ggplot2::ggsave(ofile, plot = x))
   } else {
     if (wipe){
-      files = list.files(file.path(data_path("images")), full.names = TRUE)
-      file.remove(files)
+      imagespath = file.path(opath,"images")
+      if (dir.exists(imagespath)){
+        files = list.files(imagespath, full.names = TRUE)
+        if (length(files) > 0) ok = file.remove(files)
+      }
     }
+    opath = make_path(imagespath)
     # a named list
-    opath = file.path(path, "images")
     ok = lapply(names(x),
       function(nm){
-        ofile = file.path(opath, sprintf("%s.png", nm))
+        ofile = file.path(imagespath, sprintf("%s.png", nm))
         suppressMessages(ggplot2::ggsave(ofile, plot = x[[nm]]))
       })
   }
@@ -141,7 +158,7 @@ save_graphics = function(x = plot_forecast(),
 #' @param path chr the path to search
 #' @param chr vector of files (possibly named)
 list_images = function(what = c("wrapped", "daily")[1],
-                       path = system.file("extdata", package = "calfinforecast")){
+                       path = package_path()){
   
   switch(tolower(what[1]),
          "wrapped" = file.path(path, "wrapped.png"),

@@ -1,6 +1,7 @@
 #' Plot a forecast
 #' 
 #' @export
+#' @param cfg configuration list
 #' @param x stars object
 #' @param wrap logical, if TRUE create a facet wrapped single image, otherwise
 #'   a list of ggplot objects are returned.  If only one time is provided in 
@@ -8,12 +9,12 @@
 #' @param crop NULL or bbox to crop the data
 #' @return either a single ggplot object (facet wrapped by time) or 
 #'   a list of ggplot objects (one per unit of time)
-plot_forecast = function(x = read_raster(),
+plot_forecast = function(cfg,
+                         x = read_raster(cfg),
                          wrap = length(dim(x)) > 2,
                          crop = NULL){
   coastline = read_coastline()
  
-  
   if (!is.null(crop)){
     coastline = sf::st_crop(coastline, crop)
     x = st_crop(x, crop)
@@ -31,7 +32,10 @@ plot_forecast = function(x = read_raster(),
                         na.action = na.omit) +
       viridis::scale_fill_viridis(limits = c(0,1)) + 
       ggplot2::geom_sf(data = coastline, color = "orange") + 
-      ggplot2::labs(fill = "likelihood", x= "lon", y = "lat") + 
+      ggplot2::labs(fill = "HSI", 
+                    x= NULL, 
+                    y = NULL,
+                    title = cfg$longname) + 
       ggplot2::facet_wrap(~time)
   } else {
     gg = lapply(seq_along(time),
@@ -41,7 +45,9 @@ plot_forecast = function(x = read_raster(),
                                       na.action = na.omit) +
                     viridis::scale_fill_viridis(limits = c(0,1)) + 
                     ggplot2::geom_sf(data = coastline, color = "orange") +  
-                    ggplot2::labs(title = format(time[i], "%Y-%m-%d"),
+                    ggplot2::labs(title = sprintf("%s %s",
+                                                  cfg$longname, 
+                                                  format(time[i], "%Y-%m-%d")),
                                   fill = "likelihood",
                                   x= "lon", y = "lat")
                 })
