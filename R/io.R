@@ -104,7 +104,7 @@ read_raster = function(cfg,
 #' @return for `write_config` and `read_config` a configuration list
 write_config = function(x,
                         path = data_path()){
-  filename = file.path(path, "species", cfg$species, cfg$version, "config.yaml")
+  filename = file.path(path, "species", x$species, x$version, "config.yaml")
   odir = jellyforecast::make_path(dirname(filename))
   yaml::write_yaml(x, filename[1])
   invisible(x)
@@ -127,9 +127,9 @@ list_configs = function(path = package_path()){
              full.names = TRUE)
 }
 
-#' Read a coastline
+#' Read a coastline or cities
 #' 
-#' Made with Natural Earth. Free vector and raster map data at naturalearthdata.com.
+#' Coastline made with Natural Earth. Free vector and raster map data at naturalearthdata.com.
 #'  
 #' @export
 #' @param path chr data path
@@ -138,6 +138,14 @@ read_coastline = function(path = package_path()){
   filename = file.path(path, "coastline.Rds")
   readRDS(filename[1])
 }
+
+#' @rdname read_coastline
+#' @export
+read_cities = function(path = package_path()){
+  filename = file.path(path, "cities.Rds")
+  readRDS(filename[1])
+}
+
 
 
 #' Save graphics as PNGs

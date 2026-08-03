@@ -9,6 +9,10 @@ suppressPackageStartupMessages({
 # bigelowshinytheme::copy_www(dest = "inst/shiny")
 
 PRODS = jellyforecast::read_products()
+ix = PRODS$name == "coel"
+if (any(ix)) {
+  PRODS$longname[ix] <- PRODS$cfg[[ix]]$longname <- "Jellyfish"
+}
 
 # here we assume that all forecasts cover the same dates
 DATES = PRODS$daily[[1]] |> names() |> as.Date()
@@ -25,13 +29,13 @@ ui <- shiny::fluidPage(
   
   # Header
   bigelowshinytheme::bigelow_header(
-    h2("Gelatinous Species Forecast"), 
-    h6("Cape Hatteras to Flemish Cap")),
+    h2("Jellyfish Forecast"), 
+    h6("Gulf of Maine")),
   
   # Main content
   bigelowshinytheme::bigelow_main_body(
     # Introduction
-    p("Gelatinous species forecast for the likely appearance of a patch of high abundance using Coperncius data layers"),
+    p("Jellyfish forecast for the likely appearance of a patch of high abundance using Coperncius data layers"),
     br(),
     
     bigelowshinytheme::bigelow_card(
@@ -50,7 +54,7 @@ ui <- shiny::fluidPage(
       imageOutput("imageOutput",
                   width = WIDTH,
                   height = HEIGHT) ,
-    bigelowshinytheme::bigelow_footer("Data courtesy of Copernicus Marine Data Store and Ecomon/AZMP")
+    bigelowshinytheme::bigelow_footer("Data courtesy of Copernicus Marine Data Store and Ecomon")
     ) # card
   ) # main_body
 ) #fluidPage

@@ -14,9 +14,10 @@ plot_forecast = function(cfg,
                          wrap = length(dim(x)) > 2,
                          crop = NULL){
   coastline = read_coastline()
- 
+  cities = read_cities()
   if (!is.null(crop)){
     coastline = sf::st_crop(coastline, crop)
+    cities = sf::st_crop(cities, crop)
     x = st_crop(x, crop)
   }
   
@@ -32,11 +33,14 @@ plot_forecast = function(cfg,
                         na.action = na.omit) +
       viridis::scale_fill_viridis(limits = c(0,1)) + 
       ggplot2::geom_sf(data = coastline, color = "orange") + 
-      ggplot2::labs(fill = "HSI", 
+      ggplot2::labs(fill = "", 
                     x= NULL, 
                     y = NULL,
                     title = cfg$longname) + 
-      ggplot2::guides(x =  ggplot2::guide_axis(angle = 90)) + 
+      ggplot2::theme(axis.text.x = ggplot2::element_blank(), 
+                     axis.ticks.x = ggplot2::element_blank(),
+                     axis.text.y = ggplot2::element_blank(), 
+                     axis.ticks.y = ggplot2::element_blank()) + 
       ggplot2::facet_wrap(~time)
   } else {
     gg = lapply(seq_along(time),
@@ -44,13 +48,23 @@ plot_forecast = function(cfg,
                   ggplot2::ggplot() +
                     stars::geom_stars(data = dplyr::slice(x, "time", i),
                                       na.action = na.omit) +
-                    viridis::scale_fill_viridis(limits = c(0,1)) + 
-                    ggplot2::geom_sf(data = coastline, color = "orange") +  
+                    viridis::scale_fill_viridis(name = "",
+                                                limits = c(0,1),
+                                                breaks = c(0, 1),
+                                                labels = c("less likely", 
+                                                           "more likely")) + 
+                    ggplot2::geom_sf(data = coastline, color = "gray25", linewidth = 2) + 
+                    ggplot2::geom_sf_label(data = cities,
+                                           ggplot2::aes(label = .data$city)) + 
                     ggplot2::labs(title = sprintf("%s %s",
                                                   cfg$longname, 
                                                   format(time[i], "%Y-%m-%d")),
-                                  fill = "likelihood",
-                                  x= "lon", y = "lat")
+                                  x = NULL, 
+                                  y = NULL) + 
+                    ggplot2::theme(axis.text.x = ggplot2::element_blank(), 
+                                   axis.ticks.x = ggplot2::element_blank(),
+                                   axis.text.y = ggplot2::element_blank(), 
+                                   axis.ticks.y = ggplot2::element_blank()) 
                 })
     names(gg) = format(time, "%Y-%m-%d")
     

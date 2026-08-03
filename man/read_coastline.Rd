@@ -2,9 +2,12 @@
 % Please edit documentation in R/io.R
 \name{read_coastline}
 \alias{read_coastline}
-\title{Read a coastline}
+\alias{read_cities}
+\title{Read a coastline or cities}
 \usage{
 read_coastline(path = package_path())
+
+read_cities(path = package_path())
 }
 \arguments{
 \item{path}{chr data path}
@@ -13,5 +16,5 @@ read_coastline(path = package_path())
 sfc (geometry) object
 }
 \description{
-Made with Natural Earth. Free vector and raster map data at naturalearthdata.com.
+Coastline made with Natural Earth. Free vector and raster map data at naturalearthdata.com.
 }

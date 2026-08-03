@@ -1,5 +1,5 @@
 species: coel
-longname: Coelenterates
+longname: Jellyfish
 version: v1.02
 class: jellyfish
 note: same as v1.01, but uses o2_sur and sets threshold to 0 abundance

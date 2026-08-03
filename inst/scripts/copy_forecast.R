@@ -103,20 +103,25 @@ git = function(){
 if (!interactive()){
   
   TBL = TBL |>
+    dplyr::ungroup() |>
     dplyr::rowwise() |>
     dplyr::group_map(
       function(tbl, key){
         cfg = ecopmodb::read_configuration(species = tbl$species,
                                            version = tbl$version)
-        #path = ecopmodb::version_path(cfg)
+        
         db  = ecopmodb::read_database(cfg) |>
           dplyr::filter(per == "day",
                         type == "q050",
                         .data$date %in% dates)
+        if (tbl$species == "coel"){
+          cfg$longname <- "Jellyfish"
+          tbl$longname <- "Jellyfish"
+        }
         
-        
-        s = copy_rawdata(db, cfg)
         cfg = jellyforecast::write_config(cfg)
+        s = copy_rawdata(db, cfg)
+        
         gg =jellyforecast::plot_forecast(cfg, 
                                          x = s,
                                          wrap = TRUE, 
