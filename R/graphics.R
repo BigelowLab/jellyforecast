@@ -36,6 +36,7 @@ plot_forecast = function(cfg,
                     x= NULL, 
                     y = NULL,
                     title = cfg$longname) + 
+      ggplot2::guides(x =  ggplot2::guide_axis(angle = 90)) + 
       ggplot2::facet_wrap(~time)
   } else {
     gg = lapply(seq_along(time),

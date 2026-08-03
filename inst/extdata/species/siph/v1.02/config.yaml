@@ -1,13 +1,13 @@
-species: siph
-longname: Siphonophores
+species: coel
+longname: Coelenterates
 version: v1.02
 class: jellyfish
 note: same as v1.01, but uses o2_sur and sets threshold to 0 abundance
 verbose: yes
 training_data:
-  species: siph
+  species: coel
   species_data:
-    ecomon_column: siph_m2
+    ecomon_column: coel_m2
     alt_source: function
     function: read_ecomon_covars
     threshold:
@@ -51,7 +51,7 @@ training_data:
     prop: 0.75
     times: 25
 model:
-  seed: 750.0
+  seed: 799.0
   model:
     name: Boosted Regression Tree
     engine: xgboost
@@ -76,4 +76,4 @@ predict:
   - 1.0
 suggested_threshold:
   quantile: 0.5
-  threshold: 0.3333333
+  threshold: 0.3030303
