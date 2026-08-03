@@ -24,8 +24,11 @@ package_path = function(...,
 #' 
 #' @export
 #' @param path chr data path
-#' @return data frame
-read_products = function(path = package_path()){
+#' @param extra chr, vector of extras to add as columns such as "daily" 
+#'   and "wrapped" images as well as raw "data" (default "daily", "wrapped")
+#' @return data frame with species, version, cfg and possibly daily, wrapped and data columns
+read_products = function(path = package_path(),
+                         extra = c("daily", "wrapped", "data")[1:2]){
   y = list_configs(path = path)
   if (length(y) > 0){
     cfg = lapply(y, yaml::read_yaml)
@@ -34,6 +37,28 @@ read_products = function(path = package_path()){
       version = sapply(cfg, "[[", "version"),
       longname = sapply(cfg, "[[", "longname"),
       cfg = cfg)
+    if ("daily" %in% extra){
+      x = x |>
+        dplyr::mutate(daily = lapply(x$cfg,
+                                     function(cfg){
+                                       list_images(cfg, what = "daily")
+                                     }))
+    } # daily?
+    if ("wrapped" %in% extra){
+      x = x |>
+        dplyr::mutate(wrapped = lapply(x$cfg,
+                                     function(cfg){
+                                       list_images(cfg, what = "wrapped")
+                                     }))
+    } # wrapped?   
+    if ("data" %in% extra){
+      x = x |>
+        dplyr::mutate(data = lapply(x$cfg,
+                                     function(cfg){
+                                       read_rasters(cfg)
+                                     }))
+    } # data?   
+    
   } else {
     x = dplyr::tibble(
       species = "",
@@ -98,6 +123,7 @@ read_config = function(x,
 list_configs = function(path = package_path()){
   list.files(file.path(path, "species"),
              pattern =  "^.*\\.yaml$",
+             recursive = TRUE,
              full.names = TRUE)
 }
 
@@ -154,12 +180,14 @@ save_graphics = function(cfg,
 #' List images
 #' 
 #' @export
+#' @param cfg configuration list
 #' @param what chr either "wrapped" (default) or "daily"
 #' @param path chr the path to search
 #' @param chr vector of files (possibly named)
-list_images = function(what = c("wrapped", "daily")[1],
+list_images = function(cfg,
+                       what = c("wrapped", "daily")[1],
                        path = package_path()){
-  
+  path = file.path(path, "species", cfg$species, cfg$version)
   switch(tolower(what[1]),
          "wrapped" = file.path(path, "wrapped.png"),
          "daily" = {
