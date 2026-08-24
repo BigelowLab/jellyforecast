@@ -35,8 +35,19 @@ ui <- shiny::fluidPage(
   # Main content
   bigelowshinytheme::bigelow_main_body(
     # Introduction
-    p("Jellyfish forecast for the likely appearance of a patch of high abundance using Coperncius data layers"),
-    br(),
+    HTML(r"(
+      <p> <b>The Gulf of Maine has seen an increase in jellyfish over recent years.</b> The map below shows a day-today forecast of the likelihood of 
+      jellyfish at locations across the Gulf of Maine. Scroll forward to see the prediction for upcoming days.</p>
+      
+      <p> <b>Have you seen jellyfish?</b> You can add to our dataset by submitting your sightings. You can either enter them at <a href="https://form.jotform.com/240723600886154">jellyfish.bigelow.org</a> 
+      or email your sighting directly to <a href="mailto:jellyfish@bigelow.org">jellyfish@bigelow.org </a>.</p>
+      
+      <p> <b>How the forecast works:</b> the National Marine Fisheries Service in the US has been <a href="https://www.fisheries.noaa.gov/new-england-mid-atlantic/ecosystems/monitoring-ecosystem-northeast"> monitoring plankton for many decades.</a> 
+      One of the observations they record is the presence of <a href="https://en.wikipedia.org/wiki/Jellyfish"> jellyfish</a>, <a href="https://en.wikipedia.org/wiki/Salp"> salps</a>, <a href="https://en.wikipedia.org/wiki/Siphonophore"> siphonophores</a>, 
+      and <a href="https://en.wikipedia.org/wiki/Ctenophora"> ctenophores</a> (different types of gelatinous animals). 
+      We combined these observations with the ocean forecasts provided by the <a href="https://www.copernicus.eu/en"> European Union's Space Program</a>. 
+      Using ocean modeling and artificial intelligence, we created a forecast product for jellyfish, salps, and siphonophores.</p>
+    )"),
     
     bigelowshinytheme::bigelow_card(
       headerContent = "Patch Likelihood", 
